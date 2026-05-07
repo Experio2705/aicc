@@ -1,0 +1,171 @@
+import java.util.*;
+public class TicTacToeAStar {
+ static char[][] board = new char[3][3];
+ static final char PLAYER = 'X';
+ static final char COMPUTER = 'O';
+ // Initialize board
+ static void initBoard() {
+ for (int i = 0; i < 3; i++)
+ for (int j = 0; j < 3; j++)
+ board[i][j] = ' ';
+ }
+ // Print board
+ static void printBoard() {
+ System.out.println("\nBoard:");
+ for (int i = 0; i < 3; i++) {
+ System.out.println(" " + board[i][0] + " | " + board[i][1] + " | " + board[i][2]);
+ if (i < 2) System.out.println("---|---|---");
+ }
+ }
+ // Check winner
+ static boolean isWinner(char p) {
+ for (int i = 0; i < 3; i++) {
+ if (board[i][0] == p && board[i][1] == p && board[i][2] == p) return true;
+ if (board[0][i] == p && board[1][i] == p && board[2][i] == p) return true;
+ }
+ if (board[0][0] == p && board[1][1] == p && board[2][2] == p) return true;
+ if (board[0][2] == p && board[1][1] == p && board[2][0] == p) return true;
+ return false;
+ }
+ // Check draw
+ static boolean isDraw() {
+ for (int i = 0; i < 3; i++)
+ for (int j = 0; j < 3; j++)
+ if (board[i][j] == ' ')
+ return false;
+ return true;
+ }
+ // Heuristic function (h)
+ static int heuristic() {
+ int score = 0;
+ for (int i = 0; i < 3; i++) {
+ score += evaluateLine(board[i][0], board[i][1], board[i][2]);
+ score += evaluateLine(board[0][i], board[1][i], board[2][i]);
+ }
+ score += evaluateLine(board[0][0], board[1][1], board[2][2]);
+ score += evaluateLine(board[0][2], board[1][1], board[2][0]);
+ return score;
+ }
+ // Evaluate line
+ static int evaluateLine(char a, char b, char c) {
+ int score = 0;
+ if (a == COMPUTER) score++;
+ if (b == COMPUTER) score++;
+ if (c == COMPUTER) score++;
+ if (a == PLAYER) score--;
+ if (b == PLAYER) score--;
+ if (c == PLAYER) score--;
+ return score;
+ }
+ // A* style best move (NO copyBoard)
+ static int[] findBestMove() {
+ PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> b[0] - a[0]);
+ // {f, g, row, col}
+ for (int i = 0; i < 3; i++) {
+ for (int j = 0; j < 3; j++) {
+ if (board[i][j] == ' ') {
+ // SIMULATE
+ board[i][j] = COMPUTER;
+ int g = 1;
+ int h = heuristic();
+ int f = g + h;
+ pq.add(new int[]{f, g, i, j});
+ // UNDO (VERY IMPORTANT)
+ board[i][j] = ' ';
+ }
+ }
+ }
+ if (!pq.isEmpty()) {
+ int[] best = pq.poll();
+ return new int[]{best[2], best[3]};
+ }
+ return new int[]{-1, -1};
+ }
+ public static void main(String[] args) {
+ Scanner sc = new Scanner(System.in);
+ initBoard();
+ System.out.println("Tic-Tac-Toe (A* Style)");
+ System.out.println("You are X, Computer is O");
+ while (true) {
+ printBoard();
+ // Player move
+ System.out.print("Enter row and column (0-2): ");
+ int r = sc.nextInt();
+ int c = sc.nextInt();
+ if (board[r][c] != ' ') {
+ System.out.println("Invalid move!");
+ continue;
+ }
+ board[r][c] = PLAYER;
+ if (isWinner(PLAYER)) {
+ printBoard();
+ System.out.println("You Win!");
+ break;
+ }
+ if (isDraw()) {
+ printBoard();
+ System.out.println("Draw!");
+ break;
+ }
+ // Computer move
+ int[] move = findBestMove();
+ board[move[0]][move[1]] = COMPUTER;
+ if (isWinner(COMPUTER)) {
+ printBoard();
+ System.out.println("Computer Wins!");
+ break;
+ }
+ if (isDraw()) {
+ printBoard();
+ System.out.println("Draw!");
+ break;
+ }
+ }
+ sc.close();
+ }
+}
+Output
+Tic-Tac-Toe (A* Algorithm)
+You are X, Computer is O
+Board:
+ | |
+---|---|---
+ | |
+---|---|---
+ | |
+Enter row and column (0-2): 0 0
+Board:
+X | |
+---|---|---
+ | O |
+---|---|---
+ | |
+Enter row and column (0-2): 2 2
+Board:
+X | O |
+---|---|---
+ | O |
+---|---|---
+ | | X
+Enter row and column (0-2): 2 1
+Board:
+X | O |
+---|---|---
+ | O |
+---|---|---
+O | X | X
+Enter row and column (0-2): 0 2
+Board:
+X | O | X
+---|---|---
+ | O | O
+---|---|---
+O | X | X
+Enter row and column (0-2): 1 0
+Board:
+X | O | X
+---|---|---
+X | O | O
+---|---|---
+O | X | X
+Draw!
