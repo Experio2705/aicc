@@ -1,0 +1,20 @@
+start :-
+	write("Enter work quality(1-5):"),read(Quality),
+	write("Enter work punctuality(1-5):"),read(Punc),
+	
+	Score is(Quality+Punc)/2,
+	eval(Score).
+
+eval(Score) :-
+	Score>=4,
+	 write('Eligible for promotion').
+
+eval(Score) :-
+	Score>=3,
+	Score<4,
+	 write('Needs Improvement').
+
+
+eval(Score) :-
+	Score<3,
+	 write(' Not Eligible for promotion').
